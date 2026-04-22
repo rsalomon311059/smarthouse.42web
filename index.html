@@ -33,7 +33,7 @@
         async function update() {
             const h = { "X-AIO-Key": KEY };
             try {
-                const rt = await fetch(`https://adafruit.com{USER}/feeds/temperatura/data/last`, { headers: h });
+                const rt = await fetch("https://adafruit.com" + USER + "/feeds/temperatura/data/last", { headers: h });
                 const dt = await rt.json();
                 document.getElementById("t-val").innerText = Math.round(dt.value);
 
