@@ -41,7 +41,7 @@
                 const dh = await rh.json();
                 document.getElementById("h-val").innerText = Math.round(dh.value);
 
-                const rs = await fetch(`https://adafruit.com{USER}/feeds/switch/data/last`, { headers: h });
+                const rs = await fetch(`https://adafruit.com{USER}/feeds/onoff/data/last`, { headers: h });
                 const ds = await rs.json();
                 const b = document.getElementById("mainBtn");
                 const isON = (ds.value == "ON" || ds.value == "1");
@@ -55,7 +55,7 @@
             const b = document.getElementById("mainBtn");
             const nv = b.innerText === "ENCENDIDO" ? "OFF" : "ON";
             b.innerText = "...";
-            await fetch(`https://adafruit.com{USER}/feeds/switch/data`, {
+            await fetch(`https://adafruit.com{USER}/feeds/onoff/data`, {
                 method: "POST",
                 headers: { "X-AIO-Key": KEY, "Content-Type": "application/json" },
                 body: JSON.stringify({ value: nv })
