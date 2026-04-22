@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IoT Dashboard - GitHub</title>
+    <style>
+        :root { --bg: #121212; --card: #1e1e1e; --text: #fff; }
+        body { font-family: sans-serif; background: var(--bg); color: var(--text); text-align: center; padding: 20px; }
+        .grid { display: flex; flex-wrap: wrap; justify-content: center; gap: 20px; }
+        .card { background: var(--card); padding: 20px; border-radius: 20px; width: 280px; box-shadow: 0 4px 15px rgba(0,0,0,0.5); }
+        .val { font-size: 3em; font-weight: bold; color: #00adb5; margin: 10px 0; }
+        .btn { padding: 15px; border-radius: 50px; border: none; color: white; font-weight: bold; cursor: pointer; width: 100%; font-size: 1.1em; }
+        .on { background: #2ecc71; } .off { background: #e74c3c; }
+    </style>
+</head>
+<body>
+    <h2>Mi Panel IoT (GitHub Pages)</h2>
+    <div class="grid">
+        <div class="card"><h3>Temperatura</h3><div id="t-val" class="val">--</div><span>°C</span></div>
+        <div class="card"><h3>Humedad</h3><div id="h-val" class="val">--</div><span>% HR</span></div>
+        <div class="card">
+            <h3>Control</h3>
+            <button id="mainBtn" class="btn off" onclick="toggle()">CARGANDO...</button>
+            <p id="status" style="font-size: 0.8em; margin-top: 10px;">Iniciando...</p>
+        </div>
+    </div>
+
+    <script>
+        const USER = "DesarrolloESP"; // Pon tu usuario de Adafruit
+        const KEY  = "aio_NKOx73k6lnaF4yjBi5seegSsPbwT";     // Pon tu AIO Key de Adafruit
+
+        async function update() {
+            const h = { "X-AIO-Key": KEY };
+            try {
+                const rt = await fetch(`https://adafruit.com{USER}/feeds/temperatura/data/last`, { headers: h });
+                const dt = await rt.json();
+                document.getElementById("t-val").innerText = Math.round(dt.value);
+
+                const rh = await fetch(`https://adafruit.com{USER}/feeds/humedad/data/last`, { headers: h });
+                const dh = await rh.json();
+                document.getElementById("h-val").innerText = Math.round(dh.value);
+
+                const rs = await fetch(`https://adafruit.com{USER}/feeds/switch/data/last`, { headers: h });
+                const ds = await rs.json();
+                const b = document.getElementById("mainBtn");
+                const isON = (ds.value == "ON" || ds.value == "1");
+                b.innerText = isON ? "ENCENDIDO" : "APAGADO";
+                b.className = "btn " + (isON ? "on" : "off");
+                document.getElementById("status").innerText = "Sincronizado: " + new Date().toLocaleTimeString();
+            } catch (e) { document.getElementById("status").innerText = "Error de conexión"; }
+        }
+
+        async function toggle() {
+            const b = document.getElementById("mainBtn");
+            const nv = b.innerText === "ENCENDIDO" ? "OFF" : "ON";
+            b.innerText = "...";
+            await fetch(`https://adafruit.com{USER}/feeds/switch/data`, {
+                method: "POST",
+                headers: { "X-AIO-Key": KEY, "Content-Type": "application/json" },
+                body: JSON.stringify({ value: nv })
+            });
+            update();
+        }
+
+        update();
+        setInterval(update, 10000);
+    </script>
+</body>
+</html>
